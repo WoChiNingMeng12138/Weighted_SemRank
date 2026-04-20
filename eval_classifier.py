@@ -7,9 +7,10 @@ import torch
 import os
 import itertools
 from tqdm import tqdm
-import datasets
 import json
 import pickle
+
+from corpus_io import load_corpus, resolve_data_dir
 
 if __name__ == '__main__':
 
@@ -18,40 +19,43 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--model', type=str, default='allenai/specter2_base')
-    parser.add_argument('--data_dir', type=str, default='./LitSearch')
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default='litsearch',
+        choices=('litsearch', 'csfcube', 'dorismae'),
+        help='Corpus: LitSearch from HuggingFace, or CSFCube / DORISMAE from local corpus.jsonl (see README).',
+    )
+    parser.add_argument(
+        '--data_dir',
+        type=str,
+        default=None,
+        help='Directory for specter2_topics.json and later artifacts. Default: ./LitSearch, ./CSFCube, or ./DORISMAE by dataset.',
+    )
+    parser.add_argument(
+        '--corpus_jsonl',
+        type=str,
+        default=None,
+        help='Optional path to the corpus file (CSFCube: .jsonl; DORISMAE: .jsonl or official pickle `corpus`).',
+    )
     args = parser.parse_args()
+    args.data_dir = resolve_data_dir(args.dataset, args.data_dir)
+    os.makedirs(args.data_dir, exist_ok=True)
+
+    device = torch.device(f'cuda:{args.gpu}' if torch.cuda.is_available() else 'cpu')
+    print(f'Using device: {device} (dataset={args.dataset}, data_dir={args.data_dir})')
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
 
-    state_dict = torch.load(args.model_path)
+    state_dict = torch.load(args.model_path, map_location=device)
     num_label, emb_dim = state_dict['label_embedding_weights'].size()
-    model = ClassModel(args.model, emb_dim, torch.empty((num_label, emb_dim))).to(f'cuda:{args.gpu}')
+    model = ClassModel(args.model, emb_dim, torch.empty((num_label, emb_dim))).to(device)
     model.load_state_dict(state_dict)
-    model = model.to(f'cuda:{args.gpu}')
+    model = model.to(device)
 
-    corpus_data = datasets.load_dataset("princeton-nlp/LitSearch", "corpus_clean", split="full")
-    id2doc = {doc['corpusid']: doc for doc in corpus_data}
-    corpus = []
-    id2corpus_id = []
-    for paper in corpus_data:
-        i = paper['corpusid']
-        id2corpus_id.append(i)
-        title = paper['title']
-        abstract = paper['abstract']
-        corpus.append(f'{title}. {abstract}')
-
-#     # Load from local corpus
-#     corpus_data = []
-#     with open(f'{args.data_dir}/corpus.jsonl') as f:
-#         for line in f:
-#             corpus_data.append(json.loads(line.strip()))
-#     id2doc = {doc['corpus_id']: doc for doc in corpus_data}
-#     corpus = []
-#     id2corpus_id = []
-#     for paper in corpus_data:
-#         i = paper['corpus_id']
-#         id2corpus_id.append(i)
-#         corpus.append(paper['text'])
+    id2doc, corpus, id2corpus_id = load_corpus(
+        args.dataset, args.data_dir, corpus_jsonl=args.corpus_jsonl
+    )
 
     test_data = create_infer_dataset(corpus, tokenizer)
     dataset = TensorDataset(test_data["input_ids"], test_data["attention_masks"])
@@ -60,8 +64,8 @@ if __name__ == '__main__':
     with torch.no_grad():
         predictions = []
         for batch in tqdm(data_loader):
-            input_ids = batch[0].to(f'cuda:{args.gpu}')
-            input_mask = batch[1].to(f'cuda:{args.gpu}')
+            input_ids = batch[0].to(device)
+            input_mask = batch[1].to(device)
             output = model(input_ids, input_mask).cpu().numpy()
             predictions.append(output)
     predictions = np.concatenate(predictions, axis=0)
@@ -79,10 +83,11 @@ if __name__ == '__main__':
     for i, pred in enumerate(predictions):
         corpus_id = id2corpus_id[i]
         topic_label_rank = np.argsort(-pred)
+        doc = id2doc[corpus_id]
         results[corpus_id] = {
             'corpus_id': corpus_id,
-            'title': id2doc[corpus_id]['title'],
-            'abstract': id2doc[corpus_id]['abstract'],
+            'title': doc.get('title', ''),
+            'abstract': doc.get('abstract', ''),
             'topic_labels': [(id2label[i], id2name[i], float(pred[i])) for i in topic_label_rank[:100]]
         }
 
