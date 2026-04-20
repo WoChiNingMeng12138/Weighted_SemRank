@@ -11,9 +11,20 @@ Please refer to our paper for more details ([paper](https://arxiv.org/abs/2505.2
 ## Datasets
 We use CSFCube, DORISMAE, and LitSearch in our experiments. We use the processed version of CSFCube and DORISMAE available [here](https://aclanthology.org/attachments/2024.emnlp-main.407.data.zip) and LitSearch from [HuggingFace](https://huggingface.co/datasets/princeton-nlp/LitSearch).
 
+**Smaller corpora (CSFCube ~4.2k docs, DORISMAE ~8.5k docs):** download and unpack the supplement above. The loader recognizes the **official layout** automatically:
+
+- **CSFCube:** `abstracts-csfcube-preds.jsonl` (or your own `corpus.jsonl` with `paper_id` / `corpus_id`, `title`, `abstract`).
+- **DORISMAE:** pickle file `corpus` (or `corpus.jsonl` with the same schema as in `corpus_io.py`).
+
+Point `--data_dir` at `./CSFCube` or `./DORISMAE` after copying files out of `Dataset/CSFCube` and `Dataset/DORISMAE`, **or** set `--data_dir` to the unpacked `Dataset/CSFCube` / `Dataset/DORISMAE` folder directly. Optional `--corpus_jsonl` overrides the corpus file path. Pipeline defaults are:
+
+- LitSearch: `--dataset litsearch` → artifacts under `./LitSearch` (no local corpus file; uses HuggingFace).
+- CSFCube: `--dataset csfcube` → `./CSFCube/`
+- DORISMAE: `--dataset dorismae` → `./DORISMAE/`
+
 ## Build Index
 
-Run the following commands to build the semantic index.
+Run the following commands to build the semantic index (swap `--dataset` / paths for CSFCube or DORISMAE as above).
 ```
 # Predict candidate topic labels (GPU needed)
 python eval_classifier.py
@@ -24,7 +35,16 @@ python llm-topic.py
 # Encode corpus + semantic labels (GPU needed)
 python encoding.py
 ```
-Our code by default load and process LitSearch with gpt-4.1-mini and specter2. Please check the detailed arguments for changing to different encoders or LLMs and how to load local corpus at ```eval_classifier.py```.
+
+Example for **CSFCube** (after `corpus.jsonl` is in place under `./CSFCube`):
+
+```
+python eval_classifier.py --dataset csfcube
+python llm-topic.py --dataset csfcube
+python encoding.py --dataset csfcube
+```
+
+Our code by default loads and processes **LitSearch** with gpt-4.1-mini and specter2. Use `--dataset`, `--data_dir`, and `--corpus_jsonl` where documented in `eval_classifier.py`, `llm-topic.py`, and `encoding.py`.
 
 We provide the trained topic classifier checkpoint on the CSRanking domain using [MAPLE](https://github.com/yuzhimanhua/MAPLE). The checkpoint can be [downloaded here](https://www.dropbox.com/scl/fi/tzg189k3n6tfxr2lzvjqj/topic_classifier_specter2.pt?rlkey=hnp2kfkxezubqeblpq4ym8kkd&st=btgz2a4s&dl=0) and please put it in the ```./classifier``` folder which also includes the complete label space. 
 

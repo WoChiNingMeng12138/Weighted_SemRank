@@ -1,0 +1,21 @@
+name: semrank
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch
+  - pytorch-cuda=12.1
+  - pip
+  - pip:
+      - transformers
+      - datasets
+      - tqdm
+      - numpy
+      - scikit-learn
+      - joblib
+      - openai
+      - aiohttp
+      - tiktoken
+      - adapters>=1.0.0

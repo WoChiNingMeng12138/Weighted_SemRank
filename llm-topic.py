@@ -1,20 +1,101 @@
 import json
 import os
-from api.openai.chat import chat
 import numpy as np
 import argparse
 
-# Put your api key here
-os.environ["OPENAI_API_KEY"] = 'your key'
+from corpus_io import resolve_data_dir
+
+
+def build_specter2_corpus_with_topic_terms(data_dir: str, output: dict) -> dict:
+    """
+    Map LLM <top>...</top> names onto classifier topic tuples.
+
+    Keys in topic_labels are canonical names (mixed case). LLM output is matched
+    case-insensitively on the label string (strip + lower).
+    """
+    new_results: dict = {}
+    for corpusid, info in output.items():
+        if info.get('llm_error') or not info.get('llm_output'):
+            continue
+        topic_by_lower = {}
+        for t in info['topic_labels']:
+            k = t[1].strip().lower()
+            if k not in topic_by_lower:
+                topic_by_lower[k] = t
+        llm_output = info['llm_output']
+        raw = llm_output.split('<top>')[1].split('</top>')[0].split(', ')
+        topics = []
+        for tname in raw:
+            key = tname.strip().lower()
+            if key in topic_by_lower:
+                topics.append(topic_by_lower[key])
+        terms = llm_output.split('<kp>')[1].split('</kp>')[0].split(', ')
+        terms = [t.strip() for t in terms]
+        new_results[corpusid] = {
+            'corpusid': corpusid,
+            'title': info.get('title', ''),
+            'abstract': info.get('abstract', ''),
+            'text': f"{info['title']}. {info['abstract']}",
+            'topics': topics,
+            'terms': terms,
+        }
+    out_path = os.path.join(data_dir, 'specter2_corpus_with-topic-terms.json')
+    json.dump(new_results, open(out_path, 'w'), indent=0)
+    return new_results
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='main', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--data_dir', type=str, default='./LitSearch')
-    parser.add_argument('--gpt_model', type=str, default='gpt-4.1-mini')
-    parser.add_argument('--tier', type=str, default='tier4') # change to tier4, there is no tier3 anymore
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default='litsearch',
+        choices=('litsearch', 'csfcube', 'dorismae'),
+        help='Must match the dataset used for eval_classifier / specter2_topics.json (default dirs: see README).',
+    )
+    parser.add_argument(
+        '--data_dir',
+        type=str,
+        default=None,
+        help='Directory with specter2_topics.json. Default: ./LitSearch, ./CSFCube, or ./DORISMAE by dataset.',
+    )
+    parser.add_argument(
+        '--provider',
+        type=str,
+        choices=('openai', 'tamu'),
+        default=os.environ.get('CHAT_API_PROVIDER', 'openai'),
+        help='LLM backend: openai (OPENAI_API_KEY) or tamu (TAMUS_AI_CHAT_API_KEY / TAMU_CHAT_API_KEY).',
+    )
+    parser.add_argument(
+        '--gpt_model',
+        type=str,
+        default='gpt-4.1-mini',
+        help='Model id: OpenAI e.g. gpt-4.1-mini; TAMU default gpt-4.1-mini → protected.gpt-4.1-mini (override id via TAMU_GPT_4_1_MINI_MODEL or pass e.g. --gpt_model protected.gpt-4.1-mini).',
+    )
+    parser.add_argument('--tier', type=str, default='tier1')
+    parser.add_argument(
+        '--half_usage',
+        action='store_true',
+        help='Halve client-side RPM/TPM caps (recommended when TAMU or OpenAI still returns quota/throttle errors).',
+    )
+    parser.add_argument(
+        '--rebuild_final_only',
+        action='store_true',
+        help='Only rebuild specter2_corpus_with-topic-terms.json from existing specter2-llm-topics.json (no API).',
+    )
     args = parser.parse_args()
+    args.data_dir = resolve_data_dir(args.dataset, args.data_dir)
+    os.makedirs(args.data_dir, exist_ok=True)
+
+    if args.rebuild_final_only:
+        llm_path = os.path.join(args.data_dir, 'specter2-llm-topics.json')
+        output = json.load(open(llm_path))
+        n = len(build_specter2_corpus_with_topic_terms(args.data_dir, output))
+        print(f'Wrote specter2_corpus_with-topic-terms.json ({n} papers) under {args.data_dir}')
+        raise SystemExit(0)
+
+    from api.openai.chat import chat, CHAT_FAILED_RESPONSE
 
     topic_candidates = json.load(open(f'{args.data_dir}/specter2_topics.json'))
 
@@ -34,12 +115,8 @@ if __name__ == '__main__':
         output = {}
 
     id_list = [i for i in topic_candidates if i not in output]
-
-    # id_list = id_list[:400] # for test, just limit the document to 20, reduce the usage of api
-
     curr_len = len(id_list)
-    batch_size = 20 #10 #5000 originally, change to 20 in the local computer
-
+    batch_size = 5000
     while len(id_list) > 0:
         print(f'{len(output)}/{len(topic_candidates)}')
         inputs = []
@@ -52,15 +129,25 @@ if __name__ == '__main__':
             doc = f'Title: {title}\nPaper Abstract: {abstract}\nCandidate Topics: {topic_labels}'
             inputs.append(doc)
 
-        results = chat(inputs, instruction, model_name=args.gpt_model, tier_list=args.tier, seed=np.random.randint(0, 1000))
+        results = chat(
+            inputs,
+            instruction,
+            model_name=args.gpt_model,
+            tier_list=args.tier,
+            api_provider=args.provider,
+            half_usage=args.half_usage,
+            seed=np.random.randint(0, 1000),
+        )
 
         for corpus_id, res in zip(id_list[:batch_size], results):
+            if res == CHAT_FAILED_RESPONSE:
+                output[corpus_id] = {**topic_candidates[corpus_id], 'llm_error': 'api_error', 'llm_output': None}
+                continue
             if '<kp>' not in res or '<top>' not in res or\
             '</kp>' not in res or '</top>' not in res:
                 continue
             output[corpus_id] = topic_candidates[corpus_id]
             output[corpus_id]['llm_output'] = res
-
 
         print('start saving')
         json.dump(output, open(f'{args.data_dir}/specter2-llm-topics.json', 'w'), indent=0)
@@ -68,31 +155,9 @@ if __name__ == '__main__':
 
         id_list = [i for i in topic_candidates if i not in output]
 
-
-        # id_list = id_list[:400] # for test, just limit the document to 20, reduce the usage of api
-
         if len(id_list) == curr_len:
             break
         else:
             curr_len = len(id_list)
 
-        # uncomment the below code to try the small amount of samples
-        # if len(output) >= 800:
-        #     break
-
-    parsed_results = {}
-    for corpusid, info in output.items():
-        topic2score = {t[1]:t for t in info['topic_labels']}
-        llm_output = info['llm_output']
-        topics = llm_output.split('<top>')[1].split('</top>')[0].split(', ')
-        topics = [topic2score[tname.strip().lower()] for tname in topics if tname.strip().lower() in topic2score]
-        terms = llm_output.split('<kp>')[1].split('</kp>')[0].split(', ')
-        terms = [t.strip() for t in terms]
-        parsed_results[corpusid] = { # we only have parsed_results, not new_results
-            'corpusid': corpusid,
-            'title': info['title'], # change the placeholder info['text']
-            'abstract': info['abstract'],
-            'topics': topics,
-            'terms': terms
-        }
-    json.dump(parsed_results, open(f'{args.data_dir}/specter2_corpus_with-topic-terms.json', 'w'), indent=0)
+    build_specter2_corpus_with_topic_terms(args.data_dir, output)

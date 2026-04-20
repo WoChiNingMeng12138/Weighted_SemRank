@@ -1,0 +1,16 @@
+nohup: ignoring input
+8348/8482
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/llm-topic.py", line 132, in <module>
+    results = chat(
+  File "/home/cxliang/.conda/envs/semrank-gpu/lib/python3.10/site-packages/joblib/memory.py", line 607, in __call__
+    return self._cached_call(args, kwargs, shelving=False)[0]
+  File "/home/cxliang/.conda/envs/semrank-gpu/lib/python3.10/site-packages/joblib/memory.py", line 562, in _cached_call
+    return self._call(call_id, args, kwargs, shelving)
+  File "/home/cxliang/.conda/envs/semrank-gpu/lib/python3.10/site-packages/joblib/memory.py", line 832, in _call
+    output = self.func(*args, **kwargs)
+  File "/home/data/cxliang/SemRank/api/openai/chat.py", line 309, in chat
+    api_key = _resolve_api_key(provider)
+  File "/home/data/cxliang/SemRank/api/openai/chat.py", line 110, in _resolve_api_key
+    raise KeyError('OPENAI_API_KEY is required when CHAT_API_PROVIDER=openai (or unset).')
+KeyError: 'OPENAI_API_KEY is required when CHAT_API_PROVIDER=openai (or unset).'

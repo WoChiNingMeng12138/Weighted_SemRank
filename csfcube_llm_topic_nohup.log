@@ -1,0 +1,157 @@
+nohup: ignoring input
+WARNING:root:Request 53 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 14:44:22 2026)
+WARNING:root:Request 200 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 15:05:37 2026)
+WARNING:root:Request 364 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 15:29:06 2026)
+WARNING:root:Request 474 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 15:45:02 2026)
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1159' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+OSError: [Errno 28] No space left on device
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1157' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1163' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1165' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1167' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1169' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+--- Logging error ---
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1171' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+--- Logging error ---
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1173' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+--- Logging error ---
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1175' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+--- Logging error ---
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1177' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+--- Logging error ---
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1179' coro=<APIRequest.call_api() done, defined at /home/data/cxliang/SemRank/api/openai/chat_parallel.py:401> exception=OSError(28, 'No space left on device')>
+Traceback (most recent call last):
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 527, in call_api
+    append_to_jsonl(data, save_filepath)
+  File "/home/data/cxliang/SemRank/api/openai/chat_parallel.py", line 558, in append_to_jsonl
+    with open(filename, "a") as f:
+OSError: [Errno 28] No space left on device
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+--- Logging error ---
+WARNING:root:Request 849 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 16:38:52 2026)
+WARNING:root:Request 1361 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 17:52:19 2026)
+WARNING:root:Request 1458 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 18:06:25 2026)
+WARNING:root:Request 1878 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Request 1875 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 19:06:50 2026)
+WARNING:root:Request 2248 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 19:59:50 2026)
+WARNING:root:Request 2885 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 21:31:04 2026)
+WARNING:root:Request 2906 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 21:34:20 2026)
+WARNING:root:Request 3044 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 21:54:22 2026)
+WARNING:root:Request 3173 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 22:12:49 2026)
+WARNING:root:Request 3532 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 23:04:22 2026)
+WARNING:root:Request 3533 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Request 3598 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 23:14:08 2026)
+WARNING:root:Request 3600 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Request 3874 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sat Apr 18 23:53:48 2026)
+WARNING:root:Request 4146 failed with error {'type': 'empty_body', 'message': 'HTTP 200: JSON `null` body (upstream/proxy glitch; not a valid chat completion)'}
+WARNING:root:Pausing 60.0s to cool down (until Sun Apr 19 00:33:00 2026)

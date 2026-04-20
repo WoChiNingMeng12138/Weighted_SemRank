@@ -1,0 +1,21 @@
+name: semrank-gpu
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu124
+      - torch==2.6.0
+      - torchvision==0.21.0
+      - torchaudio==2.6.0
+      - transformers<5
+      - datasets
+      - tqdm
+      - numpy
+      - scikit-learn
+      - joblib
+      - openai
+      - aiohttp
+      - tiktoken
+      - adapters>=1.0.0
