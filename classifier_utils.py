@@ -16,7 +16,7 @@ from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
 from transformers import AutoTokenizer, AutoModel
 import argparse
 import json
-
+import math # import the math lib, bug
 
 
 class ClassModel(nn.Module):
@@ -73,10 +73,11 @@ class LBM(nn.Module):
 
 
 def encode(docs, tokenizer, max_len):
-    encoded_dict = tokenizer.batch_encode_plus(docs, add_special_tokens=True, 
-                                               max_length=max_len, padding='max_length',
-                                                return_attention_mask=True, truncation=True, 
-                                               return_tensors='pt')
+    # change the fuction to tokenizer, this can be used in the newest transformer
+    encoded_dict = tokenizer(docs, add_special_tokens=True, 
+                             max_length=max_len, padding='max_length', truncation=True,
+                             return_attention_mask=True,
+                             return_tensors='pt')
     input_ids = encoded_dict['input_ids']
     attention_masks = encoded_dict['attention_mask']
     return input_ids, attention_masks
