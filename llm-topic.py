@@ -4,6 +4,7 @@ from api.openai.chat import chat
 import numpy as np
 import argparse
 
+# Put your api key here
 os.environ["OPENAI_API_KEY"] = 'your key'
 
 
@@ -12,7 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='main', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--data_dir', type=str, default='./LitSearch')
     parser.add_argument('--gpt_model', type=str, default='gpt-4.1-mini')
-    parser.add_argument('--tier', type=str, default='tier3')
+    parser.add_argument('--tier', type=str, default='tier4') # change to tier4, there is no tier3 anymore
     args = parser.parse_args()
 
     topic_candidates = json.load(open(f'{args.data_dir}/specter2_topics.json'))
@@ -33,8 +34,12 @@ if __name__ == '__main__':
         output = {}
 
     id_list = [i for i in topic_candidates if i not in output]
+
+    # id_list = id_list[:400] # for test, just limit the document to 20, reduce the usage of api
+
     curr_len = len(id_list)
-    batch_size = 5000
+    batch_size = 20 #10 #5000 originally, change to 20 in the local computer
+
     while len(id_list) > 0:
         print(f'{len(output)}/{len(topic_candidates)}')
         inputs = []
@@ -56,16 +61,24 @@ if __name__ == '__main__':
             output[corpus_id] = topic_candidates[corpus_id]
             output[corpus_id]['llm_output'] = res
 
+
         print('start saving')
         json.dump(output, open(f'{args.data_dir}/specter2-llm-topics.json', 'w'), indent=0)
         print('finished saving')
 
         id_list = [i for i in topic_candidates if i not in output]
 
+
+        # id_list = id_list[:400] # for test, just limit the document to 20, reduce the usage of api
+
         if len(id_list) == curr_len:
             break
         else:
             curr_len = len(id_list)
+
+        # uncomment the below code to try the small amount of samples
+        # if len(output) >= 800:
+        #     break
 
     parsed_results = {}
     for corpusid, info in output.items():
@@ -75,10 +88,11 @@ if __name__ == '__main__':
         topics = [topic2score[tname.strip().lower()] for tname in topics if tname.strip().lower() in topic2score]
         terms = llm_output.split('<kp>')[1].split('</kp>')[0].split(', ')
         terms = [t.strip() for t in terms]
-        new_results[corpusid] = {
+        parsed_results[corpusid] = { # we only have parsed_results, not new_results
             'corpusid': corpusid,
-            'text': info['text'],
+            'title': info['title'], # change the placeholder info['text']
+            'abstract': info['abstract'],
             'topics': topics,
             'terms': terms
         }
-    json.dump(new_results, open(f'{args.data_dir}/specter2_corpus_with-topic-terms.json', 'w'), indent=0)
+    json.dump(parsed_results, open(f'{args.data_dir}/specter2_corpus_with-topic-terms.json', 'w'), indent=0)
