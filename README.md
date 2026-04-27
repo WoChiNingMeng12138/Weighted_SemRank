@@ -16,9 +16,8 @@ In scientific literature, many high-frequency concepts are broad and non-discrim
 This motivates a corpus-aware weighting strategy that can emphasize informative concepts and suppress generic ones.
 
 ### Related Work
-
-- **SemRank (2025)** combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.
-- **PairSem (2026)** extends this idea by modeling structured entity-aspect relations for more fine-grained scientific matching.
+[SemRank (2025)](https://arxiv.org/abs/2505.21815) combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.
+[PairSem (2026)](https://arxiv.org/abs/2510.09897) extends this idea by modeling structured entity-aspect relations for more fine-grained scientific matching.
 
 Our work focuses on the **importance-aware scoring** part of this direction and implements a lightweight extension on top of the SemRank pipeline.
 
@@ -28,9 +27,9 @@ We replace the uniform concept aggregation in SemRank with a corpus-aware weight
 
 For each extracted concept \( p_i \), we compute a global rarity-based weight:
 
-\[
+$$
 w_i = \log\left(\frac{N+1}{df(p_i)+1}\right)
-\]
+$$
 
 where:
 
@@ -39,9 +38,9 @@ where:
 
 The final semantic score becomes a weighted aggregation instead of uniform averaging:
 
-\[
+$$
 \text{Score}(q, d) = \sum_i w_i \cdot \text{Sim}(p_i, d)
-\]
+$$
 
 This design gives higher influence to rare, high-information concepts and lower influence to common background terms.
 
@@ -55,12 +54,10 @@ We evaluate our method on two scientific retrieval benchmarks:
 
 - **CSFCube**
   - Corpus size: 4,207 papers
-  - Query count: 34
   - Focus: faceted query-by-example retrieval in computer science
 
 - **DORISMAE**
   - Corpus size: 8,482 papers
-  - Query count: 90
   - Focus: multi-faceted scientific document retrieval with complex relevance relations
 
 ### Compared Methods
@@ -99,15 +96,3 @@ Although the gains are modest, they are consistent at deeper recall levels.
 This suggests that corpus-aware weighting helps recover additional relevant documents by emphasizing more discriminative technical concepts.
 
 At the same time, Recall@50 does not improve in the current setup, indicating that the weighting strategy may be more beneficial for broader recall than for very early ranking positions.
-
----
-
-## Takeaway
-
-This task shows that a simple **importance-aware reranking mechanism** can be integrated into SemRank without changing its overall retrieval pipeline.
-
-Our main conclusion is:
-
-- **Uniform concept weighting is not always optimal**
-- **Corpus-aware concept rarity provides a useful signal**
-- **GAW offers a lightweight way to improve scientific retrieval coverage, especially at deeper ranks**
