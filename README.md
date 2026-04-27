@@ -1,67 +1,113 @@
-# SemRank
-The source code used for paper [Scientific Paper Retrieval with LLM-Guided Semantic-Based Ranking](https://arxiv.org/abs/2505.21815), published in EMNLP 2025.
+## Task 1: Importance-Aware Scoring (Global Aspect Weighting, GAW)
 
-## Overview
-**SemRank** is an effective and efficient paper retrieval framework that combines LLM-guided query understanding with a concept-based semantic index. Each paper is indexed using multi-granular scientific concepts, including general research topics and detailed key phrases. At query time, an LLM identifies core concepts derived from the corpus to explicitly capture the query's information need. These identified concepts enable precise semantic matching, significantly enhancing retrieval accuracy.
+### Background
 
-Please refer to our paper for more details ([paper](https://arxiv.org/abs/2505.21815)).
+Scientific paper retrieval is a critical task for literature discovery and research.  
+Unlike general web search, scientific retrieval is often driven by specialized terminology and multi-faceted intent, where a query may depend on several fine-grained technical concepts rather than a single broad topic.
 
-<img src="./semrank-example.png" width="1000px"></img>
+### Motivation
 
-## Datasets
-We use CSFCube, DORISMAE, and LitSearch in our experiments. We use the processed version of CSFCube and DORISMAE available [here](https://aclanthology.org/attachments/2024.emnlp-main.407.data.zip) and LitSearch from [HuggingFace](https://huggingface.co/datasets/princeton-nlp/LitSearch).
+Recent semantic retrieval methods improve over purely dense retrieval, but they still have two major limitations:
 
-**Smaller corpora (CSFCube ~4.2k docs, DORISMAE ~8.5k docs):** download and unpack the supplement above. The loader recognizes the **official layout** automatically:
+- **Uniform weighting**: extracted concepts are typically treated as equally important, even though some concepts are much more informative than others.
+- **Open-loop execution**: these systems usually perform a single retrieval-and-rerank pass without explicitly modeling concept salience at the corpus level.
 
-- **CSFCube:** `abstracts-csfcube-preds.jsonl` (or your own `corpus.jsonl` with `paper_id` / `corpus_id`, `title`, `abstract`).
-- **DORISMAE:** pickle file `corpus` (or `corpus.jsonl` with the same schema as in `corpus_io.py`).
+In scientific literature, many high-frequency concepts are broad and non-discriminative, while rare concepts often carry stronger technical meaning.  
+This motivates a corpus-aware weighting strategy that can emphasize informative concepts and suppress generic ones.
 
-Point `--data_dir` at `./CSFCube` or `./DORISMAE` after copying files out of `Dataset/CSFCube` and `Dataset/DORISMAE`, **or** set `--data_dir` to the unpacked `Dataset/CSFCube` / `Dataset/DORISMAE` folder directly. Optional `--corpus_jsonl` overrides the corpus file path. Pipeline defaults are:
+### Related Work
 
-- LitSearch: `--dataset litsearch` → artifacts under `./LitSearch` (no local corpus file; uses HuggingFace).
-- CSFCube: `--dataset csfcube` → `./CSFCube/`
-- DORISMAE: `--dataset dorismae` → `./DORISMAE/`
+- **SemRank (2025)** combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.
+- **PairSem (2026)** extends this idea by modeling structured entity-aspect relations for more fine-grained scientific matching.
 
-## Build Index
+Our work focuses on the **importance-aware scoring** part of this direction and implements a lightweight extension on top of the SemRank pipeline.
 
-Run the following commands to build the semantic index (swap `--dataset` / paths for CSFCube or DORISMAE as above).
-```
-# Predict candidate topic labels (GPU needed)
-python eval_classifier.py
+### Our Idea: Global Aspect Weighting (GAW)
 
-# Get LLM-assigned topic labels (OpenAI key needed)
-python llm-topic.py
+We replace the uniform concept aggregation in SemRank with a corpus-aware weighting scheme.
 
-# Encode corpus + semantic labels (GPU needed)
-python encoding.py
-```
+For each extracted concept \( p_i \), we compute a global rarity-based weight:
 
-Example for **CSFCube** (after `corpus.jsonl` is in place under `./CSFCube`):
+\[
+w_i = \log\left(\frac{N+1}{df(p_i)+1}\right)
+\]
 
-```
-python eval_classifier.py --dataset csfcube
-python llm-topic.py --dataset csfcube
-python encoding.py --dataset csfcube
-```
+where:
 
-Our code by default loads and processes **LitSearch** with gpt-4.1-mini and specter2. Use `--dataset`, `--data_dir`, and `--corpus_jsonl` where documented in `eval_classifier.py`, `llm-topic.py`, and `encoding.py`.
+- \( N \) is the total number of documents in the corpus
+- \( df(p_i) \) is the number of documents containing concept \( p_i \)
 
-We provide the trained topic classifier checkpoint on the CSRanking domain using [MAPLE](https://github.com/yuzhimanhua/MAPLE). The checkpoint can be [downloaded here](https://www.dropbox.com/scl/fi/tzg189k3n6tfxr2lzvjqj/topic_classifier_specter2.pt?rlkey=hnp2kfkxezubqeblpq4ym8kkd&st=btgz2a4s&dl=0) and please put it in the ```./classifier``` folder which also includes the complete label space. 
+The final semantic score becomes a weighted aggregation instead of uniform averaging:
 
-If you want to use semantic indexing in domains other than Computer Science, we recommend you to look at other available corpora from [MAPLE](https://github.com/yuzhimanhua/MAPLE) and check the text classifier training code by [TELEClass](https://github.com/yzhan238/TELEClass) which also supports training a hierarchical text classifier without labeled data.
+\[
+\text{Score}(q, d) = \sum_i w_i \cdot \text{Sim}(p_i, d)
+\]
 
-## Run SemRank Retrieval
+This design gives higher influence to rare, high-information concepts and lower influence to common background terms.
 
-Please check ```SemRank.ipynb``` which includes step-by-step running of SemRank
+---
 
-## Citations
+## Experimental Setup
 
-If you find our work useful for your research, please cite the following paper:
-```
-@inproceedings{zhang2025semrank,
-    title={Scientific Paper Retrieval with LLM-Guided Semantic-Based Ranking},
-    author={Yunyi Zhang and Ruozhen Yang and Siqi Jiao and SeongKu Kang and Jiawei Han},
-    booktitle={Findings of EMNLP},
-    year={2025}
-}
-```
+### Datasets
+
+We evaluate our method on two scientific retrieval benchmarks:
+
+- **CSFCube**
+  - Corpus size: 4,207 papers
+  - Query count: 34
+  - Focus: faceted query-by-example retrieval in computer science
+
+- **DORISMAE**
+  - Corpus size: 8,482 papers
+  - Query count: 90
+  - Focus: multi-faceted scientific document retrieval with complex relevance relations
+
+### Compared Methods
+
+- **semrank+u (Baseline)**: original SemRank with uniform concept weighting
+- **semrank_gaw (Proposed)**: our GAW-based variant with corpus-aware concept weighting
+
+### Evaluation Metrics
+
+We report:
+
+- **Recall@50**
+- **Recall@100**
+
+---
+
+## Results
+
+| Dataset | Queries | Method | Recall@50 | Recall@100 |
+|---------|---------|--------|-----------|------------|
+| CSFCube | 34 | semrank+u (Baseline) | 0.5415 | 0.6979 |
+| CSFCube | 34 | semrank_gaw (Proposed) | 0.5393 | 0.6995 |
+| DORISMAE | 90 | semrank+u (Baseline) | 0.5651 | 0.7228 |
+| DORISMAE | 90 | semrank_gaw (Proposed) | 0.5642 | 0.7277 |
+
+---
+
+## Discussion
+
+The results show that **GAW slightly improves Recall@100 on both datasets**, while Recall@50 remains comparable to the original SemRank baseline.
+
+- On **CSFCube**, GAW improves Recall@100 from **0.6979** to **0.6995**
+- On **DORISMAE**, GAW improves Recall@100 from **0.7228** to **0.7277**
+
+Although the gains are modest, they are consistent at deeper recall levels.  
+This suggests that corpus-aware weighting helps recover additional relevant documents by emphasizing more discriminative technical concepts.
+
+At the same time, Recall@50 does not improve in the current setup, indicating that the weighting strategy may be more beneficial for broader recall than for very early ranking positions.
+
+---
+
+## Takeaway
+
+This task shows that a simple **importance-aware reranking mechanism** can be integrated into SemRank without changing its overall retrieval pipeline.
+
+Our main conclusion is:
+
+- **Uniform concept weighting is not always optimal**
+- **Corpus-aware concept rarity provides a useful signal**
+- **GAW offers a lightweight way to improve scientific retrieval coverage, especially at deeper ranks**
