@@ -17,8 +17,9 @@ This motivates a corpus-aware weighting strategy that can emphasize informative 
 
 ### Related Work
 We have made improvements based on the research presented in the following two papers:
-[SemRank (2025)](https://arxiv.org/abs/2505.21815) combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.\n
-[PairSem (2026)](https://arxiv.org/abs/2510.09897) extends this idea by modeling structured entity-aspect relations for more fine-grained scientific matching.
+
+- **[SemRank (2025)](https://arxiv.org/abs/2505.21815)** combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.
+- **[PairSem (2026)](https://arxiv.org/abs/2510.09897)** extends this idea by modeling structured entity-aspect relations for more fine-grained scientific matching.
 
 Our work focuses on the **importance-aware scoring** part of this direction and implements a lightweight extension on top of the SemRank pipeline.
 
