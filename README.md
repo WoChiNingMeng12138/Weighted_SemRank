@@ -78,12 +78,12 @@ We use the below metrics to evaluate our works:
 
 ## Results
 
-| Dataset | Queries | Method | Recall@50 | Recall@100 |
-|---------|---------|--------|-----------|------------|
-| CSFCube | 34 | semrank+u (Baseline) | 0.5415 | 0.6979 |
-| CSFCube | 34 | semrank_gaw (Proposed) | 0.5393 | 0.6995 |
-| DORISMAE | 90 | semrank+u (Baseline) | 0.5651 | 0.7228 |
-| DORISMAE | 90 | semrank_gaw (Proposed) | 0.5642 | 0.7277 |
+| Dataset | Method | Recall@50 | Recall@100 |
+|---------|--------|-----------|------------|
+| CSFCube | semrank+u (Baseline) | 0.5415 | 0.6979 |
+| CSFCube | semrank_gaw (Proposed) | 0.5393 | 0.6995 |
+| DORISMAE | semrank+u (Baseline) | 0.5651 | 0.7228 |
+| DORISMAE | semrank_gaw (Proposed) | 0.5642 | 0.7277 |
 
 ---
 
