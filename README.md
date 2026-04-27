@@ -16,7 +16,8 @@ In scientific literature, many high-frequency concepts are broad and non-discrim
 This motivates a corpus-aware weighting strategy that can emphasize informative concepts and suppress generic ones.
 
 ### Related Work
-[SemRank (2025)](https://arxiv.org/abs/2505.21815) combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.
+We have made improvements based on the research presented in the following two papers:
+[SemRank (2025)](https://arxiv.org/abs/2505.21815) combines LLM-guided query understanding with a concept-based semantic index built from topics and key phrases.\n
 [PairSem (2026)](https://arxiv.org/abs/2510.09897) extends this idea by modeling structured entity-aspect relations for more fine-grained scientific matching.
 
 Our work focuses on the **importance-aware scoring** part of this direction and implements a lightweight extension on top of the SemRank pipeline.
@@ -67,7 +68,7 @@ We evaluate our method on two scientific retrieval benchmarks:
 
 ### Evaluation Metrics
 
-We report:
+We use the below metrics to evaluate our works:
 
 - **Recall@50**
 - **Recall@100**
